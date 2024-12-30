@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会员注册系统</title>
+    <!-- 引入XLSX库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- 引入图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --text-color: #2c3e50;
+            --border-color: #bdc3c7;
+            --background-color: #ecf0f1;
+            --hover-color: #f5f6fa;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow-color);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        .section {
+            margin-bottom: 35px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow-color);
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            color: var(--primary-color);
+            font-size: 1.2em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .password-group {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            z-index: 10;
+            padding: 5px;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+        }
+
+        .volunteer-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .volunteer-type {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .volunteer-type:hover {
+            background-color: var(--hover-color);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .volunteer-type input[type="checkbox"],
+        .volunteer-type input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 40px;
+        }
+
+        button {
+            padding: 12px 35px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 3px 6px rgba(52, 152, 219, 0.3);
+        }
+
+        .submit-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .reset-btn {
+            background-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .reset-btn:hover {
+            background-color: #95a5a6;
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+            padding: 8px;
+            border-radius: 4px;
+            background-color: rgba(231, 76, 60, 0.1);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-content {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        .export-success {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: none;
+            animation: slideIn 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        /* 记录查看对话框样式 */
+        .record-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .record-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: scaleIn 0.3s ease-out;
+        }
+
+        .record-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .record-table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+        }
+
+        .record-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .record-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .export-btn, .confirm-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .volunteer-types {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .section {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>注册</h1>
+        </div>
+        
+        <form id="registrationForm">
+            <!-- 账号信息 -->
+            <div class="section">
+                <h2 class="section-title">账号信息</h2>
+                <span class="section-toggle" onclick="toggleSection(this)">
+                    <i class="fas fa-chevron-up"></i>
+                </span>
+                
+                <div class="section-content">
+                    <div class="form-group">
+                        <label for="username">用户名</label>
+                        <input type="text" id="username" name="username" required>
+                        <div class="error-message" id="username-error"></div>
+                    </div>
+
+                    <div class="form-group password-group">
+                        <label for="password">密码</label>
+                        <input type="password" id="password" name="password" required>
+                        <span class="password-toggle" onclick="togglePassword('password')">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                        <div class="error-message" id="password-error"></div>
+                    </div>
+
+                    <div class="form-group password-group">
+                        <label for="confirmPassword">确认密码</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required>
+                        <span class="password-toggle" onclick="togglePassword('confirmPassword')">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                        <div class="error-message" id="confirm-password-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">电子邮箱</label>
+                        <input type="email" id="email" name="email" required>
+                        <div class="error-message" id="email-error"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 个人信息 -->
+            <div class="section">
+                <h2 class="section-title">个人信息</h2>
+                <span class="section-toggle" onclick="toggleSection(this)">
+                    <i class="fas fa-chevron-up"></i>
+                </span>
+                
+                <div class="section-content">
+                    <div class="form-group">
+                        <label for="realName">真实姓名</label>
+                        <input type="text" id="realName" name="realName" required>
+                        <div class="error-message" id="realname-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="idType">证件类型</label>
+                        <select id="idType" name="idType" required>
+                            <option value="">请选择证件类型</option>
+                            <option value="1">身份证</option>
+                            <option value="2">护照</option>
+                            <option value="3">港澳通行证</option>
+                        </select>
+                        <div class="error-message" id="idtype-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="idNumber">证件号码</label>
+<input type="text" id="idNumber" name="idNumber" required>
+                        <div class="error-message" id="idnumber-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>性别</label>
+                        <div class="volunteer-types">
+                            <label class="volunteer-type">
+                                <input type="radio" name="gender" value="male" required> 男
+                            </label>
+                            <label class="volunteer-type">
+                                <input type="radio" name="gender" value="female" required> 女
+                            </label>
+                        </div>
+                        <div class="error-message" id="gender-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="birthDate">出生日期</label>
+                        <input type="date" id="birthDate" name="birthDate" required>
+                        <div class="error-message" id="birthdate-error"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 服务信息 -->
+            <div class="section">
+                <h2 class="section-title">服务信息</h2>
+                <span class="section-toggle" onclick="toggleSection(this)">
+                    <i class="fas fa-chevron-up"></i>
+                </span>
+                
+                <div class="section-content">
+                    <div class="form-group">
+                        <label for="serviceArea">服务区域</label>
+                        <input type="text" id="serviceArea" name="serviceArea" required>
+                        <div class="error-message" id="servicearea-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>服务类型（可多选）</label>
+                        <div class="volunteer-types">
+                            <label class="volunteer-type">
+                                <input type="checkbox" name="volunteerType" value="youth"> 青年志愿者
+                            </label>
+                            <label class="volunteer-type">
+                                <input type="checkbox" name="volunteerType" value="medical"> 医疗志愿者
+                            </label>
+                            <label class="volunteer-type">
+                                <input type="checkbox" name="volunteerType" value="cultural"> 文化志愿者
+                            </label>
+                            <label class="volunteer-type">
+                                <input type="checkbox" name="volunteerType" value="community"> 社区志愿者
+                            </label>
+                        </div>
+                        <div class="error-message" id="volunteertype-error"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-user-plus"></i> 提交注册
+                </button>
+                <button type="reset" class="reset-btn">
+                    <i class="fas fa-redo"></i> 重置
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 加载提示 -->
+    <div class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>正在处理，请稍候...</p>
+        </div>
+    </div>
+
+    <!-- Excel导出成功提示 -->
+    <div class="export-success" id="exportSuccess">
+        <i class="fas fa-check-circle"></i> Excel文件导出成功！
+    </div>
+
+    <script>
+        // 密码显示/隐藏功能
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = event.currentTarget.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // 区块展开/收起功能
+        function toggleSection(element) {
+            const section = element.parentElement;
+            const content = section.querySelector('.section-content');
+            const icon = element.querySelector('i');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            } else {
+                content.style.display = 'none';
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            }
+        }
+
+        // 数据处理类
+        class DataHandler {
+            constructor() {
+                this.records = [];
+                this.loadRecords();
+            }
+
+            loadRecords() {
+                const savedRecords = localStorage.getItem('registrationRecords');
+                if (savedRecords) {
+                    this.records = JSON.parse(savedRecords);
+                }
+            }
+
+            saveRecords() {
+                localStorage.setItem('registrationRecords', JSON.stringify(this.records));
+            }
+
+            addRecord(data) {
+                const record = {
+                    ...data,
+                    id: Date.now(),
+                    registrationDate: new Date().toLocaleString()
+                };
+                this.records.push(record);
+                this.saveRecords();
+                return record;
+            }
+
+            exportToExcel(data) {
+                try {
+                    // 处理数据，移除敏感信息
+                    const exportData = {...data};
+                    delete exportData.password;
+                    delete exportData.confirmPassword;
+
+                    // 创建工作表
+                    const ws = XLSX.utils.json_to_sheet([exportData]);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "Registration");
+                    
+                    // 生成文件名
+                    const fileName = `registration_${new Date().getTime()}.xlsx`;
+                    
+                    // 写入文件并下载
+                    XLSX.writeFile(wb, fileName);
+
+                    // 显示成功提示
+                    const successMsg = document.getElementById('exportSuccess');
+                    successMsg.style.display = 'block';
+                    setTimeout(() => {
+                        successMsg.style.display = 'none';
+                    }, 3000);
+
+                    return true;
+                } catch (error) {
+                    console.error('Excel导出失败:', error);
+                    alert('Excel导出失败，请重试');
+                    return false;
+                }
+            }
+
+            showRecordDialog(data) {
+                const dialog = document.createElement('div');
+                dialog.className = 'record-dialog';
+                
+                const content = document.createElement('div');
+                content.className = 'record-content';
+
+                // 添加标题和关闭按钮
+                const header = document.createElement('div');
+                header.style.display = 'flex';
+                header.style.justifyContent = 'space-between';
+                header.style.alignItems = 'center';
+                header.style.marginBottom = '20px';
+
+                const title = document.createElement('h2');
+                title.textContent = '注册信息确认';
+                
+                const closeBtn = document.createElement('button');
+                closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                closeBtn.style.background = 'none';
+                closeBtn.style.border = 'none';
+                closeBtn.style.fontSize = '20px';
+                closeBtn.style.cursor = 'pointer';
+                closeBtn.onclick = () => dialog.remove();
+
+                header.appendChild(title);
+                header.appendChild(closeBtn);
+                content.appendChild(header);
+
+                // 创建信息表格
+                const table = document.createElement('table');
+                table.className = 'record-table';
+
+                const sensitiveFields = ['password', 'confirmPassword'];
+                Object.entries(data).forEach(([key, value]) => {
+                    if (!sensitiveFields.includes(key)) {
+                        const row = table.insertRow();
+                        const keyCell = row.insertCell();
+                        const valueCell = row.insertCell();
+                        
+                        keyCell.textContent = this.formatFieldName(key);
+                        valueCell.textContent = this.formatFieldValue(value);
+                    }
+                });
+                
+                content.appendChild(table);
+
+                // 添加按钮组
+                const buttonGroup = document.createElement('div');
+                buttonGroup.className = 'record-buttons';
+
+                const exportBtn = document.createElement('button');
+                exportBtn.className = 'export-btn';
+                exportBtn.innerHTML = '<i class="fas fa-file-excel"></i> 导出Excel';
+                exportBtn.onclick = () => {
+                    this.exportToExcel(data);
+                    dialog.remove();
+                };
+
+                const confirmBtn = document.createElement('button');
+                confirmBtn.className = 'confirm-btn';
+                confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认';
+                confirmBtn.onclick = () => dialog.remove();
+
+                buttonGroup.appendChild(exportBtn);
+                buttonGroup.appendChild(confirmBtn);
+                content.appendChild(buttonGroup);
+
+                dialog.appendChild(content);
+                document.body.appendChild(dialog);
+            }
+
+            formatFieldName(key) {
+                const nameMap = {
+                    username: '用户名',
+                    realName: '真实姓名',
+                    email: '电子邮箱',
+                    idType: '证件类型',
+                    idNumber: '证件号码',
+                    gender: '性别',
+                    birthDate: '出生日期',
+                    serviceArea: '服务区域',
+                    volunteerType: '服务类型',
+                    registrationDate: '注册时间'
+                };
+                return nameMap[key] || key;
+            }
+
+            formatFieldValue(value) {
+                if (Array.isArray(value)) {
+                    return value.join(', ');
+                }
+                return value;
+            }
+        }
+
+        // 表单验证类
+        class FormValidator {
+            constructor() {
+                this.form = document.getElementById('registrationForm');
+                this.dataHandler = new DataHandler();
+                this.initValidation();
+            }
+
+            initValidation() {
+                // 添加所有输入验证
+                this.addInputValidator('username', this.validateUsername.bind(this));
+                this.addPasswordValidator();
+                this.addInputValidator('email', this.validateEmail.bind(this));
+                this.addInputValidator('idNumber', this.validateIdNumber.bind(this));
+
+                // 表单提交处理
+                this.form.addEventListener('submit', this.handleSubmit.bind(this));
+            }
+
+            addInputValidator(inputId, validatorFn) {
+                const input = document.getElementById(inputId);
+                const errorDiv = document.getElementById(`${inputId}-error`);
+
+                input.addEventListener('blur', () => {
+                    const error = validatorFn(input.value);
+                    if (error) {
+                        errorDiv.textContent = error;
+                        errorDiv.style.display = 'block';
+                    } else {
+                        errorDiv.style.display = 'none';
+                    }
+                });
+
+                input.addEventListener('input', () => {
+                    errorDiv.style.display = 'none';
+                });
+            }
+
+            validateUsername(value) {
+                if (value.length < 4) return '用户名至少需要4个字符';
+                if (!/^[a-zA-Z0-9_]+$/.test(value)) return '用户名只能包含字母、数字和下划线';
+                return '';
+            }
+
+            validateEmail(value) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(value)) return '请输入有效的电子邮箱地址';
+                return '';
+            }
+
+            validateIdNumber(value) {
+                const idType = document.getElementById('idType').value;
+                if (idType === '1' && !/^\d{17}[\dX]$/.test(value)) {
+                    return '请输入正确的身份证号码';
+                }
+                return '';
+            }
+
+            addPasswordValidator() {
+                const password = document.getElementById('password');
+                const confirmPassword = document.getElementById('confirmPassword');
+                
+                const validatePassword = (value) => {
+                    const requirements = [
+                        { check: value.length >= 8, message: '密码至少需要8个字符' },
+                        { check: /[A-Z]/.test(value), message: '需包含大写字母' },
+                        { check: /[a-z]/.test(value), message: '需包含小写字母' },
+                        { check: /[0-9]/.test(value), message: '需包含数字' },
+                        { check: /[!@#$%^&*]/.test(value), message: '需包含特殊字符(!@#$%^&*)' }
+                    ];
+
+                    const failedRequirements = requirements.filter(req => !req.check);
+                    return failedRequirements.map(req => req.message).join(', ');
+                };
+
+                password.addEventListener('input', () => {
+                    const error = validatePassword(password.value);
+                    const errorDiv = document.getElementById('password-error');
+                    if (error) {
+                        errorDiv.textContent = error;
+                        errorDiv.style.display = 'block';
+                    } else {
+                        errorDiv.style.display = 'none';
+                    }
+                });
+
+                confirmPassword.addEventListener('input', () => {
+                    const errorDiv = document.getElementById('confirm-password-error');
+                    if (password.value !== confirmPassword.value) {
+                        errorDiv.textContent = '两次输入的密码不一致';
+                        errorDiv.style.display = 'block';
+                    } else {
+                        errorDiv.style.display = 'none';
+                    }
+                });
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+                
+                document.querySelector('.loading-overlay').style.display = 'flex';
+
+                try {
+                    // 验证所有必填字段
+                    const requiredFields = this.form.querySelectorAll('[required]');
+                    let isValid = true;
+
+                    requiredFields.forEach(field => {
+                        if (!field.value) {
+                            const errorDiv = document.getElementById(`${field.id}-error`);
+                            if (errorDiv) {
+                                errorDiv.textContent = '此字段为必填项';
+                                errorDiv.style.display = 'block';
+                            }
+                            isValid = false;
+                        }
+                    });
+
+                    // 验证服务类型是否选择
+                    const volunteerTypes = document.querySelectorAll('input[name="volunteerType"]:checked');
+                    if (volunteerTypes.length === 0) {
+                        document.getElementById('volunteertype-error').textContent = '请至少选择一个服务类型';
+                        document.getElementById('volunteertype-error').style.display = 'block';
+                        isValid = false;
+                    }
+
+                    if (!isValid) {
+                        throw new Error('请填写所有必需信息');
+                    }
+
+                    // 收集表单数据
+                    const formData = new FormData(this.form);
+                    const data = {};
+// 处理表单数据
+                    for (let [key, value] of formData.entries()) {
+                        if (key === 'volunteerType') {
+                            if (!data[key]) {
+                                data[key] = [];
+                            }
+                            data[key].push(value);
+                        } else {
+                            data[key] = value;
+                        }
+                    }
+
+                    // 添加记录并显示确认对话框
+                    const record = this.dataHandler.addRecord(data);
+                    this.dataHandler.showRecordDialog(record);
+
+                    // 重置表单
+                    this.form.reset();
+
+                } catch (error) {
+                    console.error('提交失败:', error);
+                    alert(error.message || '注册失败，请重试');
+                } finally {
+                    document.querySelector('.loading-overlay').style.display = 'none';
+                }
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            const formValidator = new FormValidator();
+
+            // 初始化所有区块为展开状态
+            document.querySelectorAll('.section-content').forEach(content => {
+                content.style.display = 'block';
+            });
+
+            // 添加表单重置事件监听
+            document.querySelector('.reset-btn').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (confirm('确定要重置所有信息吗？')) {
+                    document.getElementById('registrationForm').reset();
+                    // 清除所有错误提示
+                    document.querySelectorAll('.error-message').forEach(error => {
+                        error.style.display = 'none';
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
